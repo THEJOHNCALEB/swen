@@ -3,8 +3,6 @@ PODS:
     - Flutter
     - ReachabilitySwift
   - Flutter (1.0.0)
-  - flutter_secure_storage (6.0.0):
-    - Flutter
   - ReachabilitySwift (5.2.4)
   - share_plus (0.0.1):
     - Flutter
@@ -18,7 +16,6 @@ PODS:
 DEPENDENCIES:
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
   - Flutter (from `Flutter`)
-  - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
   - webview_flutter_wkwebview (from `.symlinks/plugins/webview_flutter_wkwebview/darwin`)
@@ -32,8 +29,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/connectivity_plus/ios"
   Flutter:
     :path: Flutter
-  flutter_secure_storage:
-    :path: ".symlinks/plugins/flutter_secure_storage/ios"
   share_plus:
     :path: ".symlinks/plugins/share_plus/ios"
   sqflite_darwin:
@@ -44,7 +39,6 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   connectivity_plus: 481668c94744c30c53b8895afb39159d1e619bdf
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  flutter_secure_storage: 1ed9476fba7e7a782b22888f956cce43e2c62f13
   ReachabilitySwift: 32793e867593cfc1177f5d16491e3a197d2fccda
   share_plus: de6030e33b4e106470e09322d87cf2a4258d2d1d
   sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0

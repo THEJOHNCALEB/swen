@@ -29,7 +29,7 @@ void main() async {
   final apiKey = dotenv.env['API_KEY'];
 
   if (apiKey != null && apiKey.isNotEmpty) {
-    await newsApiService.setApiKey(apiKey);
+    newsApiService.setApiKey(apiKey);
   }
 
   runApp(

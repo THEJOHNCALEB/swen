@@ -1,36 +1,27 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/article.dart';
 import '../errors/app_exceptions.dart';
 
 class NewsApiService {
   static const String _baseUrl = 'https://newsapi.org/v2';
-  static const String _apiKeyStorageKey = 'newsapi_key';
-  
+
   final Dio _dio;
-  final FlutterSecureStorage _secureStorage;
   String? _apiKey;
 
   NewsApiService({
     Dio? dio,
-    FlutterSecureStorage? secureStorage,
-  })  : _dio = dio ?? Dio(),
-        _secureStorage = secureStorage ?? const FlutterSecureStorage() {
+  }) : _dio = dio ?? Dio() {
     _dio.options.baseUrl = _baseUrl;
     _dio.options.connectTimeout = const Duration(seconds: 10);
     _dio.options.receiveTimeout = const Duration(seconds: 10);
-    
+
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          if (_apiKey == null) {
-            _apiKey = await _secureStorage.read(key: _apiKeyStorageKey);
-          }
-          
           if (_apiKey != null) {
             options.queryParameters['apiKey'] = _apiKey!;
           }
-          
+
           return handler.next(options);
         },
         onError: (error, handler) {
@@ -40,13 +31,11 @@ class NewsApiService {
     );
   }
 
-  Future<void> setApiKey(String apiKey) async {
+  void setApiKey(String apiKey) {
     _apiKey = apiKey;
-    await _secureStorage.write(key: _apiKeyStorageKey, value: apiKey);
   }
 
-  Future<String?> getApiKey() async {
-    _apiKey ??= await _secureStorage.read(key: _apiKeyStorageKey);
+  String? getApiKey() {
     return _apiKey;
   }
 
@@ -134,18 +123,18 @@ class NewsApiService {
 
     if (error.response != null) {
       final statusCode = error.response!.statusCode;
-      
+
       if (statusCode == 429) {
         return const RateLimitException();
       }
-      
+
       if (statusCode == 401) {
         return const InvalidApiKeyException();
       }
 
-      final message = error.response!.data?['message'] as String? ??
-          'API error occurred';
-      
+      final message =
+          error.response!.data?['message'] as String? ?? 'API error occurred';
+
       return ApiException(message, statusCode: statusCode);
     }
 
