@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_text_styles.dart';
 import '../../core/models/api_response.dart';
+import '../../core/utils/responsive.dart';
 import '../../core/widgets/doodle_background.dart';
 import '../../core/widgets/empty_state_illustration.dart';
 import '../../core/widgets/swen_brand.dart';
@@ -18,6 +19,7 @@ class BookmarksScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bookmarksState = ref.watch(bookmarksProvider);
+    final layout = Responsive.of(context);
 
     return DoodleBackground(
       opacity: 0.025,
@@ -69,7 +71,8 @@ class BookmarksScreen extends ConsumerWidget {
               ),
             ),
             Expanded(
-              child: _buildBody(context, ref, bookmarksState),
+              child: _buildBody(
+                  context, ref, bookmarksState, layout),
             ),
           ],
         ),
@@ -81,19 +84,41 @@ class BookmarksScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     ApiResponse bookmarksState,
+    ScreenLayout layout,
   ) {
     return switch (bookmarksState) {
-      ApiLoading() => _buildLoadingState(),
+      ApiLoading() => _buildLoadingState(layout),
       ApiSuccess(data: final bookmarks) => _buildSuccessState(
           context,
           ref,
           bookmarks,
+          layout,
         ),
       ApiError(message: final message) => _buildErrorState(message),
     };
   }
 
-  Widget _buildLoadingState() {
+  Widget _buildLoadingState(ScreenLayout layout) {
+    if (layout != ScreenLayout.mobile) {
+      return GridView.builder(
+        padding: const EdgeInsets.all(16),
+        gridDelegate:
+            const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 0.85,
+        ),
+        itemCount: 5,
+        itemBuilder: (context, index) {
+          return const Padding(
+            padding: EdgeInsets.only(bottom: 12),
+            child: ArticleCardSkeleton(),
+          );
+        },
+      );
+    }
+
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: 5,
@@ -110,6 +135,7 @@ class BookmarksScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     List bookmarks,
+    ScreenLayout layout,
   ) {
     if (bookmarks.isEmpty) {
       return const Center(
@@ -117,6 +143,48 @@ class BookmarksScreen extends ConsumerWidget {
           icon: Icons.bookmark_border_rounded,
           message: 'No bookmarks yet',
           subtitle: 'Save articles to read them later',
+        ),
+      );
+    }
+
+    if (layout != ScreenLayout.mobile) {
+      return RefreshIndicator(
+        onRefresh: () async {
+          await ref.read(bookmarksProvider.notifier).loadBookmarks();
+        },
+        color: AppColors.black,
+        backgroundColor: AppColors.surface,
+        child: GridView.builder(
+          padding:
+              const EdgeInsets.fromLTRB(16, 8, 16, 100),
+          gridDelegate:
+              const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 0.85,
+          ),
+          itemCount: bookmarks.length,
+          itemBuilder: (context, index) {
+            final article = bookmarks[index];
+            return ArticleCard(
+                    article: article,
+                    compactImage: true,
+                    onTap: () => context.push('/article',
+                        extra: article))
+                .animate()
+                .fadeIn(
+                  duration: 350.ms,
+                  delay: (50 * index.clamp(0, 10)).ms,
+                )
+                .slideY(
+                  begin: 0.06,
+                  end: 0,
+                  duration: 350.ms,
+                  delay: (50 * index.clamp(0, 10)).ms,
+                  curve: Curves.easeOutCubic,
+                );
+          },
         ),
       );
     }
@@ -136,7 +204,8 @@ class BookmarksScreen extends ConsumerWidget {
             padding: const EdgeInsets.only(bottom: 12),
             child: ArticleCard(
               article: article,
-              onTap: () => context.push('/article', extra: article),
+              onTap: () =>
+                  context.push('/article', extra: article),
             ),
           )
               .animate()
@@ -171,7 +240,8 @@ class BookmarksScreen extends ConsumerWidget {
             const SizedBox(height: 16),
             Text(
               message,
-              style: AppTextStyles.body.copyWith(color: AppColors.grey4),
+              style: AppTextStyles.body
+                  .copyWith(color: AppColors.grey4),
               textAlign: TextAlign.center,
             ),
           ],

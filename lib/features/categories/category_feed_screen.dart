@@ -7,6 +7,7 @@ import '../../core/constants/app_text_styles.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/constants/categories.dart';
 import '../../core/models/api_response.dart';
+import '../../core/utils/responsive.dart';
 import '../../core/widgets/doodle_background.dart';
 import '../../providers/news_provider.dart';
 import '../feed/widgets/article_card.dart';
@@ -24,6 +25,7 @@ class CategoryFeedScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final articlesState = ref.watch(topHeadlinesProvider(category));
     final displayName = categoriesDisplay[category] ?? category;
+    final layout = Responsive.of(context);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -35,7 +37,7 @@ class CategoryFeedScreen extends ConsumerWidget {
             children: [
               _buildHeader(context, displayName),
               Expanded(
-                child: _buildBody(context, ref, articlesState),
+                child: _buildBody(context, ref, articlesState, layout),
               ),
             ],
           ),
@@ -84,19 +86,41 @@ class CategoryFeedScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     ApiResponse articlesState,
+    ScreenLayout layout,
   ) {
     return switch (articlesState) {
-      ApiLoading() => _buildLoadingState(),
+      ApiLoading() => _buildLoadingState(layout),
       ApiSuccess(data: final articles) => _buildSuccessState(
           context,
           ref,
           articles,
+          layout,
         ),
       ApiError(message: final message) => _buildErrorState(ref, message),
     };
   }
 
-  Widget _buildLoadingState() {
+  Widget _buildLoadingState(ScreenLayout layout) {
+    if (layout != ScreenLayout.mobile) {
+      return GridView.builder(
+        padding: const EdgeInsets.all(16),
+        gridDelegate:
+            const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 0.85,
+        ),
+        itemCount: 8,
+        itemBuilder: (context, index) {
+          return const Padding(
+            padding: EdgeInsets.only(bottom: 12),
+            child: ArticleCardSkeleton(),
+          );
+        },
+      );
+    }
+
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: 8,
@@ -113,6 +137,7 @@ class CategoryFeedScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     List articles,
+    ScreenLayout layout,
   ) {
     if (articles.isEmpty) {
       return Center(
@@ -144,9 +169,55 @@ class CategoryFeedScreen extends ConsumerWidget {
       );
     }
 
+    if (layout != ScreenLayout.mobile) {
+      return RefreshIndicator(
+        onRefresh: () async {
+          await ref
+              .read(topHeadlinesProvider(category).notifier)
+              .refresh();
+        },
+        color: AppColors.black,
+        backgroundColor: AppColors.surface,
+        child: GridView.builder(
+          padding:
+              const EdgeInsets.fromLTRB(16, 4, 16, 24),
+          gridDelegate:
+              const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 0.85,
+          ),
+          itemCount: articles.length,
+          itemBuilder: (context, index) {
+            final article = articles[index];
+            return ArticleCard(
+                    article: article,
+                    compactImage: true,
+                    onTap: () => context.push('/article',
+                        extra: article))
+                .animate()
+                .fadeIn(
+                  duration: 350.ms,
+                  delay: (50 * index.clamp(0, 10)).ms,
+                )
+                .slideY(
+                  begin: 0.06,
+                  end: 0,
+                  duration: 350.ms,
+                  delay: (50 * index.clamp(0, 10)).ms,
+                  curve: Curves.easeOutCubic,
+                );
+          },
+        ),
+      );
+    }
+
     return RefreshIndicator(
       onRefresh: () async {
-        await ref.read(topHeadlinesProvider(category).notifier).refresh();
+        await ref
+            .read(topHeadlinesProvider(category).notifier)
+            .refresh();
       },
       color: AppColors.black,
       backgroundColor: AppColors.surface,
@@ -159,7 +230,8 @@ class CategoryFeedScreen extends ConsumerWidget {
             padding: const EdgeInsets.only(bottom: 12),
             child: ArticleCard(
               article: article,
-              onTap: () => context.push('/article', extra: article),
+              onTap: () =>
+                  context.push('/article', extra: article),
             ),
           )
               .animate()
@@ -201,15 +273,19 @@ class CategoryFeedScreen extends ConsumerWidget {
             const SizedBox(height: 20),
             Text(
               message,
-              style: AppTextStyles.body.copyWith(color: AppColors.grey4),
+              style: AppTextStyles.body
+                  .copyWith(color: AppColors.grey4),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: () {
-                ref.read(topHeadlinesProvider(category).notifier).refresh();
+                ref
+                    .read(topHeadlinesProvider(category).notifier)
+                    .refresh();
               },
-              icon: const Icon(Icons.refresh_rounded, size: 18),
+              icon:
+                  const Icon(Icons.refresh_rounded, size: 18),
               label: Text(
                 AppStrings.retry,
                 style: AppTextStyles.label.copyWith(

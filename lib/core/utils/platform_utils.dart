@@ -1,9 +1,17 @@
-import 'dart:io';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class PlatformUtils {
   PlatformUtils._();
+
+  static bool get isWeb => kIsWeb;
+  static bool get isDesktop =>
+      !kIsWeb && (Platform.isMacOS || Platform.isWindows || Platform.isLinux);
+  static bool get isMobile =>
+      !kIsWeb && (Platform.isAndroid || Platform.isIOS);
+  static bool get isDesktopOrWeb => isDesktop || isWeb;
 
   static bool get isIOS => Platform.isIOS;
   static bool get isAndroid => Platform.isAndroid;

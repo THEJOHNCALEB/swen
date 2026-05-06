@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../app.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_text_styles.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/models/api_response.dart';
+import '../../core/utils/responsive.dart';
 import '../../core/widgets/doodle_background.dart';
 import '../../core/widgets/swen_brand.dart';
 import '../../providers/search_provider.dart';
@@ -20,6 +22,7 @@ class SearchScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final searchState = ref.watch(searchResultsProvider);
     final query = ref.watch(searchQueryProvider);
+    final layout = Responsive.of(context);
 
     return DoodleBackground(
       opacity: 0.025,
@@ -32,21 +35,57 @@ class SearchScreen extends ConsumerWidget {
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
               child: const SwenBrand(titleSize: 22, taglineSize: 10),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-              child: SwenSearchBar(
-                onSearch: (q) {
-                  ref.read(searchQueryProvider.notifier).state = q;
-                  ref.read(searchResultsProvider.notifier).search(q);
-                },
-                onClear: () {
-                  ref.read(searchQueryProvider.notifier).state = '';
-                  ref.read(searchResultsProvider.notifier).clear();
-                },
+            if (layout == ScreenLayout.mobile)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                child: SwenSearchBar(
+                  focusNode: searchFocusNode,
+                  onSearch: (q) {
+                    ref.read(searchQueryProvider.notifier).state = q;
+                    ref.read(searchResultsProvider.notifier).search(q);
+                  },
+                  onClear: () {
+                    ref.read(searchQueryProvider.notifier).state = '';
+                    ref.read(searchResultsProvider.notifier).clear();
+                  },
+                ),
               ),
-            ),
+            if (layout != ScreenLayout.mobile)
+              Center(
+                child: SizedBox(
+                  width: 560,
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                    child: SwenSearchBar(
+                      focusNode: searchFocusNode,
+                      onSearch: (q) {
+                        ref
+                                .read(
+                                    searchQueryProvider.notifier)
+                                .state =
+                            q;
+                        ref
+                            .read(searchResultsProvider.notifier)
+                            .search(q);
+                      },
+                      onClear: () {
+                        ref
+                                .read(
+                                    searchQueryProvider.notifier)
+                                .state =
+                            '';
+                        ref
+                            .read(searchResultsProvider.notifier)
+                            .clear();
+                      },
+                    ),
+                  ),
+                ),
+              ),
             Expanded(
-              child: _buildBody(context, ref, searchState, query),
+              child: _buildBody(
+                  context, ref, searchState, query, layout),
             ),
           ],
         ),
@@ -59,16 +98,18 @@ class SearchScreen extends ConsumerWidget {
     WidgetRef ref,
     ApiResponse searchState,
     String query,
+    ScreenLayout layout,
   ) {
     if (query.isEmpty) {
       return _buildEmptySearch();
     }
 
     return switch (searchState) {
-      ApiLoading() => _buildLoadingState(),
+      ApiLoading() => _buildLoadingState(layout),
       ApiSuccess(data: final articles) => _buildSuccessState(
           context,
           articles,
+          layout,
         ),
       ApiError(message: final message) => _buildErrorState(message),
     };
@@ -113,9 +154,32 @@ class SearchScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildLoadingState() {
+  Widget _buildLoadingState(ScreenLayout layout) {
+    final isWide = layout != ScreenLayout.mobile;
+    if (isWide) {
+      return GridView.builder(
+        padding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        gridDelegate:
+            const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 0.85,
+        ),
+        itemCount: 6,
+        itemBuilder: (context, index) {
+          return const Padding(
+            padding: EdgeInsets.only(bottom: 12),
+            child: ArticleCardSkeleton(),
+          );
+        },
+      );
+    }
+
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding:
+          const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       itemCount: 6,
       itemBuilder: (context, index) {
         return const Padding(
@@ -126,7 +190,8 @@ class SearchScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildSuccessState(BuildContext context, List articles) {
+  Widget _buildSuccessState(
+      BuildContext context, List articles, ScreenLayout layout) {
     if (articles.isEmpty) {
       return Center(
         child: Column(
@@ -158,6 +223,40 @@ class SearchScreen extends ConsumerWidget {
       );
     }
 
+    if (layout != ScreenLayout.mobile) {
+      return GridView.builder(
+        padding:
+            const EdgeInsets.fromLTRB(16, 8, 16, 100),
+        gridDelegate:
+            const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 0.85,
+        ),
+        itemCount: articles.length,
+        itemBuilder: (context, index) {
+          final article = articles[index];
+          return SearchResultTile(
+                  article: article,
+                  onTap: () =>
+                      context.push('/article', extra: article))
+              .animate()
+              .fadeIn(
+                duration: 300.ms,
+                delay: (40 * index.clamp(0, 10)).ms,
+              )
+              .slideY(
+                begin: 0.05,
+                end: 0,
+                duration: 300.ms,
+                delay: (40 * index.clamp(0, 10)).ms,
+                curve: Curves.easeOutCubic,
+              );
+        },
+      );
+    }
+
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
       itemCount: articles.length,
@@ -167,7 +266,8 @@ class SearchScreen extends ConsumerWidget {
           padding: const EdgeInsets.only(bottom: 12),
           child: SearchResultTile(
             article: article,
-            onTap: () => context.push('/article', extra: article),
+            onTap: () =>
+                context.push('/article', extra: article),
           ),
         )
             .animate()
@@ -201,7 +301,8 @@ class SearchScreen extends ConsumerWidget {
             const SizedBox(height: 16),
             Text(
               message,
-              style: AppTextStyles.body.copyWith(color: AppColors.grey4),
+              style: AppTextStyles.body
+                  .copyWith(color: AppColors.grey4),
               textAlign: TextAlign.center,
             ),
           ],

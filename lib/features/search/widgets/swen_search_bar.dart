@@ -5,11 +5,13 @@ import '../../../core/constants/app_text_styles.dart';
 class SwenSearchBar extends StatefulWidget {
   final Function(String) onSearch;
   final VoidCallback? onClear;
+  final FocusNode? focusNode;
 
   const SwenSearchBar({
     super.key,
     required this.onSearch,
     this.onClear,
+    this.focusNode,
   });
 
   @override
@@ -18,12 +20,13 @@ class SwenSearchBar extends StatefulWidget {
 
 class _SwenSearchBarState extends State<SwenSearchBar> {
   final TextEditingController _controller = TextEditingController();
-  final FocusNode _focusNode = FocusNode();
+  late final FocusNode _focusNode;
   bool _hasFocus = false;
 
   @override
   void initState() {
     super.initState();
+    _focusNode = widget.focusNode ?? FocusNode();
     _focusNode.addListener(() {
       setState(() => _hasFocus = _focusNode.hasFocus);
     });
@@ -32,7 +35,9 @@ class _SwenSearchBarState extends State<SwenSearchBar> {
   @override
   void dispose() {
     _controller.dispose();
-    _focusNode.dispose();
+    if (widget.focusNode == null) {
+      _focusNode.dispose();
+    }
     super.dispose();
   }
 

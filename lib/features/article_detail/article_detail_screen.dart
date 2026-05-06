@@ -10,6 +10,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_text_styles.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/utils/date_formatter.dart';
+import '../../core/utils/responsive.dart';
 import '../../core/widgets/doodle_background.dart';
 import '../../providers/bookmarks_provider.dart';
 
@@ -75,34 +76,47 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final layout = Responsive.of(context);
+    final isWide = layout != ScreenLayout.mobile;
+    final maxWidth = layout == ScreenLayout.tablet ? 720.0 : 760.0;
+
+    final content = Column(
+      children: [
+        _buildAppBar(context),
+        if (widget.article.imageUrl != null) _buildHeroImage(),
+        _buildArticleHeader(),
+        Expanded(
+          child: Stack(
+            children: [
+              WebViewWidget(controller: _webViewController),
+              if (_isLoading)
+                Container(
+                  color: AppColors.background,
+                  child: Center(
+                    child: PlatformUtils.adaptiveProgressIndicator(
+                      color: AppColors.black,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: DoodleBackground(
         opacity: 0.02,
         child: SafeArea(
-          child: Column(
-            children: [
-              _buildAppBar(context),
-              if (widget.article.imageUrl != null) _buildHeroImage(),
-              _buildArticleHeader(),
-              Expanded(
-                child: Stack(
-                  children: [
-                    WebViewWidget(controller: _webViewController),
-                    if (_isLoading)
-                      Container(
-                        color: AppColors.background,
-                        child: Center(
-                          child: PlatformUtils.adaptiveProgressIndicator(
-                            color: AppColors.black,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+          child: isWide
+              ? Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: maxWidth),
+                    child: content,
+                  ),
+                )
+              : content,
         ),
       ),
     );
@@ -219,7 +233,8 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
                 const SizedBox(width: 8),
               ],
               Text(
-                DateFormatter.formatPublishedDate(widget.article.publishedAt),
+                DateFormatter.formatPublishedDate(
+                    widget.article.publishedAt),
                 style: AppTextStyles.caption,
               ),
             ],

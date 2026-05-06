@@ -7,6 +7,7 @@ class NewsApiService {
 
   final Dio _dio;
   String? _apiKey;
+  String? _proxyUrl;
 
   NewsApiService({
     Dio? dio,
@@ -18,7 +19,20 @@ class NewsApiService {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          if (_apiKey != null) {
+          if (_proxyUrl != null) {
+            if (_apiKey != null) {
+              options.queryParameters['apiKey'] = _apiKey!;
+            }
+            final originalPath = options.path;
+            final originalQuery =
+                Uri(queryParameters: Map.from(options.queryParameters))
+                    .query;
+            options.path = '';
+            options.baseUrl = _proxyUrl!;
+            options.queryParameters.clear();
+            options.queryParameters['url'] =
+                '$_baseUrl$originalPath${originalQuery.isNotEmpty ? '?$originalQuery' : ''}';
+          } else if (_apiKey != null) {
             options.queryParameters['apiKey'] = _apiKey!;
           }
 
@@ -33,6 +47,10 @@ class NewsApiService {
 
   void setApiKey(String apiKey) {
     _apiKey = apiKey;
+  }
+
+  void setProxyUrl(String url) {
+    _proxyUrl = url;
   }
 
   String? getApiKey() {

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import '../utils/platform_utils.dart';
 
 class ConnectivityService {
   final Connectivity _connectivity;
@@ -21,10 +22,7 @@ class ConnectivityService {
   void _startListening() {
     _subscription = _connectivity.onConnectivityChanged.listen(
       (ConnectivityResult result) {
-        final isConnected = result == ConnectivityResult.mobile ||
-            result == ConnectivityResult.wifi ||
-            result == ConnectivityResult.ethernet;
-        _connectivityController?.add(isConnected);
+        _connectivityController?.add(_isConnected(result));
       },
     );
 
@@ -37,18 +35,28 @@ class ConnectivityService {
   }
 
   Future<void> _checkInitialConnectivity() async {
-    final result = await _connectivity.checkConnectivity();
-    final isConnected = result == ConnectivityResult.mobile ||
-        result == ConnectivityResult.wifi ||
-        result == ConnectivityResult.ethernet;
-    _connectivityController?.add(isConnected);
+    final connected = await checkConnectivity();
+    _connectivityController?.add(connected);
   }
 
-  Future<bool> checkConnectivity() async {
-    final result = await _connectivity.checkConnectivity();
+  bool _isConnected(ConnectivityResult result) {
     return result == ConnectivityResult.mobile ||
         result == ConnectivityResult.wifi ||
         result == ConnectivityResult.ethernet;
+  }
+
+  Future<bool> checkConnectivity() async {
+    try {
+      final result = await _connectivity.checkConnectivity();
+      if (_isConnected(result)) return true;
+
+      if (PlatformUtils.isDesktopOrWeb) {
+        return true;
+      }
+      return false;
+    } catch (_) {
+      return PlatformUtils.isDesktopOrWeb;
+    }
   }
 
   void dispose() {

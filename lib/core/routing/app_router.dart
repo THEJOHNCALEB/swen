@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/splash/splash_screen.dart';
-import '../../features/shell/main_shell.dart';
+import '../../app/adaptive_shell.dart';
+import '../../features/feed/feed_screen.dart';
+import '../../features/categories/categories_screen.dart';
 import '../../features/categories/category_feed_screen.dart';
+import '../../features/search/search_screen.dart';
+import '../../features/bookmarks/bookmarks_screen.dart';
 import '../../features/article_detail/article_detail_screen.dart';
 import '../models/article.dart';
 
@@ -20,11 +24,11 @@ final appRouter = GoRouter(
         transitionDuration: const Duration(milliseconds: 300),
       ),
     ),
-    GoRoute(
-      path: '/',
-      pageBuilder: (context, state) => CustomTransitionPage<void>(
+    StatefulShellRoute.indexedStack(
+      pageBuilder: (context, state, navigationShell) =>
+          CustomTransitionPage<void>(
         key: state.pageKey,
-        child: const MainShell(),
+        child: AdaptiveShell(navigationShell: navigationShell),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(
             opacity: CurvedAnimation(
@@ -44,6 +48,52 @@ final appRouter = GoRouter(
         },
         transitionDuration: const Duration(milliseconds: 600),
       ),
+      branches: [
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/',
+              pageBuilder: (context, state) => NoTransitionPage<void>(
+                key: state.pageKey,
+                child: const FeedScreen(),
+              ),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/categories',
+              pageBuilder: (context, state) => NoTransitionPage<void>(
+                key: state.pageKey,
+                child: const CategoriesScreen(),
+              ),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/search',
+              pageBuilder: (context, state) => NoTransitionPage<void>(
+                key: state.pageKey,
+                child: const SearchScreen(),
+              ),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/bookmarks',
+              pageBuilder: (context, state) => NoTransitionPage<void>(
+                key: state.pageKey,
+                child: const BookmarksScreen(),
+              ),
+            ),
+          ],
+        ),
+      ],
     ),
     GoRoute(
       path: '/category/:category',

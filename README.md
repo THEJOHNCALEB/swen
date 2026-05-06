@@ -111,6 +111,77 @@ lib/
 - **Colors:** `lib/core/constants/app_colors.dart`
 - **Typography:** `lib/core/constants/app_text_styles.dart`
 
+## Platform Support
+
+| Platform | Status | Notes |
+|---|---|---|
+| Android | Full feature support |
+| iOS | Full feature support |
+| Web | Deployed at [live URL] |
+| macOS | Download: [Google Drive link] |
+| Windows | Download: [Google Drive link] |
+| Linux | Download: [Google Drive link] |
+
+## Platform Adaptations
+
+- **Mobile (<600px):** Bottom navigation, touch gestures, single-column layout
+- **Web (600–1024px):** NavigationRail, 2-column article grid
+- **Desktop (>1024px):** Sidebar navigation (220px), 2-column feed, app menu bar, keyboard shortcuts, right-click context menus, mouse hover states, resizable window (min 800×560)
+
+## Keyboard Shortcuts (Desktop / Web)
+
+| Shortcut | Action |
+|---|---|
+| Cmd/Ctrl + 1 | Go to Feed |
+| Cmd/Ctrl + 2 | Go to Categories |
+| Cmd/Ctrl + 3 | Go to Search |
+| Cmd/Ctrl + 4 | Go to Saved |
+| Cmd/Ctrl + R | Refresh Feed |
+| Cmd/Ctrl + F | Focus Search |
+| Escape | Go back / clear search |
+| ? | Show shortcuts overlay |
+
+## Web Deployment
+Live URL: [insert Vercel/Netlify URL]
+
+## Desktop Downloads
+- macOS (.dmg): [Google Drive link]
+- Windows (.exe): [Google Drive link]
+- Linux (.AppImage): [Google Drive link]
+
+## Web Build
+
+```bash
+flutter build web --release --web-renderer canvaskit
+# Deploy the build/web/ folder to Vercel or Netlify
+```
+
+## Desktop Builds
+
+### macOS
+
+```bash
+flutter build macos --release
+# Output: build/macos/Build/Products/Release/Swen.app
+# Package as .dmg using create-dmg or Xcode archive
+```
+
+### Windows
+
+```bash
+flutter build windows --release
+# Output: build/windows/runner/Release/
+# Package as .exe installer using Inno Setup or MSIX
+```
+
+### Linux
+
+```bash
+flutter build linux --release
+# Output: build/linux/x64/release/bundle/
+# Package as .AppImage using appimagetool
+```
+
 ## Building for Release
 
 ### Android
@@ -133,7 +204,7 @@ flutter build ios --release
 
 ## License
 
-This project is created for educational purposes (HNG Stage 3).
+This project is created for educational purposes (HNG Stage 4).
 
 ## Credits
 
