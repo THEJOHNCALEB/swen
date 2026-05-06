@@ -1,9 +1,8 @@
 # Swen - news, reversed.
 
-A clean, monochrome news app.
+A clean, monochrome news app. Available on Web, macOS, iOS, and Android.
 
-**Web:** [swen.thejohncaleb.com](https://swen.thejohncaleb.com)  
-**macOS:** [Download Swen.dmg](https://github.com/thejohncaleb/swen/releases/latest/download/Swen.dmg)
+Download for macOS: [Swen.dmg](https://github.com/THEJOHNCALEB/swen/releases/download/SWEN/Swen.dmg)
 
 ## Features
 
@@ -17,24 +16,6 @@ A clean, monochrome news app.
 - **Skeleton Loaders** — Smooth loading states with shimmer effects
 - **Animations** — Staggered list animations and custom page transitions
 - **Share** — Share articles via native share sheet
-
-## Tech Stack
-
-| Layer | Package | Purpose |
-|-------|---------|---------|
-| State Management | `flutter_riverpod` | App-wide state |
-| HTTP Client | `dio` | API calls + interceptors |
-| Local Cache | `hive` + `hive_flutter` | Offline cache + bookmarks |
-| In-App Browser | `webview_flutter` | Article detail view |
-| Images | `cached_network_image` | Image caching |
-| Skeleton Loader | `shimmer` | Loading states |
-| Animations | `flutter_animate` | UI animations |
-| Navigation | `go_router` | Typed routing |
-| Connectivity | `connectivity_plus` | Online/offline detection |
-| Share | `share_plus` | Share articles |
-| Date Formatting | `intl` | Publication dates |
-| Secure Storage | `flutter_secure_storage` | API key storage |
-| Environment | `flutter_dotenv` | .env configuration |
 
 ## Setup
 
@@ -77,12 +58,16 @@ A clean, monochrome news app.
 lib/
 ├── main.dart                           # App entry point
 ├── app.dart                            # GoRouter + theme setup
+├── app/
+│   ├── adaptive_shell.dart             # Responsive navigation shell
+│   ├── app_menu.dart                   # macOS PlatformMenuBar
+│   └── swen_shortcuts.dart             # Keyboard shortcuts
 ├── core/
 │   ├── constants/                      # Colors, text styles, strings
 │   ├── models/                         # Article, ApiResponse
 │   ├── services/                       # NewsAPI, Cache, Connectivity
 │   ├── errors/                         # Custom exceptions
-│   ├── utils/                          # Date formatter, helpers
+│   ├── utils/                          # Date formatter, responsive, platform
 │   └── routing/                        # GoRouter configuration
 ├── features/
 │   ├── splash/                         # Splash screen
@@ -106,25 +91,6 @@ lib/
 - **Bookmarks:** Persistent across sessions
 - **Offline mode:** Shows cached articles when offline
 
-
-## Customization
-
-- **Categories:** `lib/core/constants/categories.dart`
-- **Cache duration:** `lib/core/services/cache_service.dart` (default: 24h)
-- **Colors:** `lib/core/constants/app_colors.dart`
-- **Typography:** `lib/core/constants/app_text_styles.dart`
-
-## Platform Support
-
-| Platform | Status | Notes |
-|---|---|---|
-| Android | ✅ | Full feature support |
-| iOS | ✅ | Full feature support |
-| Web | ✅ | [swen.thejohncaleb.com](https://swen.thejohncaleb.com) |
-| macOS | ✅ | [Download Swen.dmg](https://github.com/thejohncaleb/swen/releases/latest/download/Swen.dmg) |
-| Windows | ✅ | Download: [Google Drive link] |
-| Linux | ✅ | Download: [Google Drive link] |
-
 ## Platform Adaptations
 
 - **Mobile (<600px):** Bottom navigation, touch gestures, single-column layout
@@ -135,57 +101,31 @@ lib/
 
 | Shortcut | Action |
 |---|---|
-| Cmd/Ctrl + 1 | Go to Feed |
-| Cmd/Ctrl + 2 | Go to Categories |
-| Cmd/Ctrl + 3 | Go to Search |
-| Cmd/Ctrl + 4 | Go to Saved |
-| Cmd/Ctrl + R | Refresh Feed |
-| Cmd/Ctrl + F | Focus Search |
-| Escape | Go back / clear search |
-| ? | Show shortcuts overlay |
+| `Cmd/Ctrl + 1` | Go to Feed |
+| `Cmd/Ctrl + 2` | Go to Categories |
+| `Cmd/Ctrl + 3` | Go to Search |
+| `Cmd/Ctrl + 4` | Go to Saved |
+| `Cmd/Ctrl + R` | Refresh Feed |
+| `Cmd/Ctrl + F` | Focus Search |
+| `Escape` | Go back / clear search |
+| `?` | Show shortcuts overlay |
 
-## Web Deployment
-Live URL: [swen.thejohncaleb.com](https://swen.thejohncaleb.com)
+## Building for Release
 
-## Desktop Downloads
-- macOS (.dmg): [Download Swen.dmg](https://github.com/thejohncaleb/swen/releases/latest/download/Swen.dmg) (21 MB, Apple Silicon / Intel)
-- Windows (.exe): [Google Drive link]
-- Linux (.AppImage): [Google Drive link]
-
-## Web Build
+### Web
 
 ```bash
-flutter build web --release --web-renderer canvaskit
-# Deploy the build/web/ folder to Vercel or Netlify
+flutter build web --release
+# Deploy build/web/ to Vercel or Netlify
 ```
-
-## Desktop Builds
 
 ### macOS
 
 ```bash
 flutter build macos --release
 # Output: build/macos/Build/Products/Release/Swen.app
-# Package as .dmg using create-dmg or Xcode archive
+# Package as .dmg: hdiutil create -volname Swen -srcfolder Swen.app -format UDZO Swen.dmg
 ```
-
-### Windows
-
-```bash
-flutter build windows --release
-# Output: build/windows/runner/Release/
-# Package as .exe installer using Inno Setup or MSIX
-```
-
-### Linux
-
-```bash
-flutter build linux --release
-# Output: build/linux/x64/release/bundle/
-# Package as .AppImage using appimagetool
-```
-
-## Building for Release
 
 ### Android
 
@@ -199,11 +139,12 @@ flutter build apk --release
 flutter build ios --release
 ```
 
-## Notes
+## Customization
 
-- **Minimum SDK:** Android 21 / iOS 14
-- **API Key Security:** Stored in `flutter_secure_storage`, never committed to git
-- **Font Licensing:** DM Sans and DM Mono are open source (OFL)
+- **Categories:** `lib/core/constants/categories.dart`
+- **Cache duration:** `lib/core/services/cache_service.dart` (default: 24h)
+- **Colors:** `lib/core/constants/app_colors.dart`
+- **Typography:** `lib/core/constants/app_text_styles.dart`
 
 ## License
 
