@@ -2,6 +2,9 @@
 
 A clean, monochrome news app.
 
+**Web:** [swen.thejohncaleb.com](https://swen.thejohncaleb.com)  
+**macOS:** [Download Swen.dmg](https://github.com/thejohncaleb/swen/releases/latest/download/Swen.dmg)
+
 ## Features
 
 - **Splash Screen** — Minimalist "Swen" intro animation
@@ -115,17 +118,17 @@ lib/
 
 | Platform | Status | Notes |
 |---|---|---|
-| Android | Full feature support |
-| iOS | Full feature support |
-| Web | Deployed at [live URL] |
-| macOS | Download: [Google Drive link] |
-| Windows | Download: [Google Drive link] |
-| Linux | Download: [Google Drive link] |
+| Android | ✅ | Full feature support |
+| iOS | ✅ | Full feature support |
+| Web | ✅ | [swen.thejohncaleb.com](https://swen.thejohncaleb.com) |
+| macOS | ✅ | [Download Swen.dmg](https://github.com/thejohncaleb/swen/releases/latest/download/Swen.dmg) |
+| Windows | ✅ | Download: [Google Drive link] |
+| Linux | ✅ | Download: [Google Drive link] |
 
 ## Platform Adaptations
 
 - **Mobile (<600px):** Bottom navigation, touch gestures, single-column layout
-- **Web (600–1024px):** NavigationRail, 2-column article grid
+- **Tablet (600–1024px):** NavigationRail, 2-column article grid
 - **Desktop (>1024px):** Sidebar navigation (220px), 2-column feed, app menu bar, keyboard shortcuts, right-click context menus, mouse hover states, resizable window (min 800×560)
 
 ## Keyboard Shortcuts (Desktop / Web)
@@ -142,10 +145,10 @@ lib/
 | ? | Show shortcuts overlay |
 
 ## Web Deployment
-Live URL: [insert Vercel/Netlify URL]
+Live URL: [swen.thejohncaleb.com](https://swen.thejohncaleb.com)
 
 ## Desktop Downloads
-- macOS (.dmg): [Google Drive link]
+- macOS (.dmg): [Download Swen.dmg](https://github.com/thejohncaleb/swen/releases/latest/download/Swen.dmg) (21 MB, Apple Silicon / Intel)
 - Windows (.exe): [Google Drive link]
 - Linux (.AppImage): [Google Drive link]
 
