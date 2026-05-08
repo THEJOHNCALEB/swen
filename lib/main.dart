@@ -43,14 +43,12 @@ void main() async {
   await cacheService.init();
 
   final newsApiService = container.read(newsApiServiceProvider);
-  final apiKey = dotenv.env['API_KEY'];
+  final apiKey = const String.fromEnvironment('GNEWS_API_KEY').isNotEmpty
+      ? const String.fromEnvironment('GNEWS_API_KEY')
+      : dotenv.env['GNEWS_API_KEY'] ?? dotenv.env['API_KEY'];
 
   if (apiKey != null && apiKey.isNotEmpty) {
     newsApiService.setApiKey(apiKey);
-  }
-
-  if (PlatformUtils.isWeb) {
-    newsApiService.setProxyUrl('https://corsproxy.io/?');
   }
 
   runApp(

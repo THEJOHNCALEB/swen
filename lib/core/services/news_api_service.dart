@@ -1,13 +1,15 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import '../models/article.dart';
 import '../errors/app_exceptions.dart';
 
 class NewsApiService {
-  static const String _baseUrl = 'https://newsapi.org/v2';
+  static String get _baseUrl => kIsWeb
+      ? '/api'
+      : 'https://gnews.io/api/v4';
 
   final Dio _dio;
   String? _apiKey;
-  String? _proxyUrl;
 
   NewsApiService({
     Dio? dio,
@@ -19,23 +21,9 @@ class NewsApiService {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          if (_proxyUrl != null) {
-            if (_apiKey != null) {
-              options.queryParameters['apiKey'] = _apiKey!;
-            }
-            final originalPath = options.path;
-            final originalQuery =
-                Uri(queryParameters: Map.from(options.queryParameters))
-                    .query;
-            options.path = '';
-            options.baseUrl = _proxyUrl!;
-            options.queryParameters.clear();
-            options.queryParameters['url'] =
-                '$_baseUrl$originalPath${originalQuery.isNotEmpty ? '?$originalQuery' : ''}';
-          } else if (_apiKey != null) {
-            options.queryParameters['apiKey'] = _apiKey!;
+          if (_apiKey != null) {
+            options.queryParameters['token'] = _apiKey!;
           }
-
           return handler.next(options);
         },
         onError: (error, handler) {
@@ -47,10 +35,6 @@ class NewsApiService {
 
   void setApiKey(String apiKey) {
     _apiKey = apiKey;
-  }
-
-  void setProxyUrl(String url) {
-    _proxyUrl = url;
   }
 
   String? getApiKey() {
@@ -68,9 +52,9 @@ class NewsApiService {
         '/top-headlines',
         queryParameters: {
           'category': category,
-          'country': country,
+          'lang': 'en',
           'page': page,
-          'pageSize': pageSize,
+          'max': pageSize,
         },
       );
 
@@ -88,13 +72,12 @@ class NewsApiService {
   }) async {
     try {
       final response = await _dio.get(
-        '/everything',
+        '/search',
         queryParameters: {
           'q': query,
+          'lang': 'en',
           'page': page,
-          'pageSize': pageSize,
-          'sortBy': sortBy,
-          'language': 'en',
+          'max': pageSize,
         },
       );
 
@@ -146,7 +129,7 @@ class NewsApiService {
         return const RateLimitException();
       }
 
-      if (statusCode == 401) {
+      if (statusCode == 401 || statusCode == 403) {
         return const InvalidApiKeyException();
       }
 

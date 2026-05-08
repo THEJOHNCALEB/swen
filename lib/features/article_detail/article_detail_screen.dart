@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:swen/core/utils/platform_utils.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/models/article.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_text_styles.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/utils/date_formatter.dart';
+import '../../core/utils/platform_utils.dart';
 import '../../core/utils/responsive.dart';
 import '../../core/widgets/doodle_background.dart';
+import '../../core/widgets/app_network_image.dart';
 import '../../providers/bookmarks_provider.dart';
 
 class ArticleDetailScreen extends ConsumerStatefulWidget {
@@ -35,7 +37,9 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _initWebView();
+    if (!kIsWeb) {
+      _initWebView();
+    }
     _checkBookmarkStatus();
   }
 
@@ -53,6 +57,13 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
         ),
       )
       ..loadRequest(Uri.parse(widget.article.url));
+  }
+
+  void _openArticle() async {
+    final uri = Uri.parse(widget.article.url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 
   Future<void> _checkBookmarkStatus() async {
@@ -86,20 +97,7 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
         if (widget.article.imageUrl != null) _buildHeroImage(),
         _buildArticleHeader(),
         Expanded(
-          child: Stack(
-            children: [
-              WebViewWidget(controller: _webViewController),
-              if (_isLoading)
-                Container(
-                  color: AppColors.background,
-                  child: Center(
-                    child: PlatformUtils.adaptiveProgressIndicator(
-                      color: AppColors.black,
-                    ),
-                  ),
-                ),
-            ],
-          ),
+          child: kIsWeb ? _buildWebContent() : _buildWebViewContent(),
         ),
       ],
     );
@@ -119,6 +117,77 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
               : content,
         ),
       ),
+    );
+  }
+
+  Widget _buildWebContent() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: const BoxDecoration(
+                color: AppColors.grey7,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.open_in_browser_rounded,
+                size: 48,
+                color: AppColors.grey4,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Read Full Article',
+              style: AppTextStyles.display.copyWith(
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Open the article in your browser to read the full content.',
+              style: AppTextStyles.body.copyWith(color: AppColors.grey4),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: _openArticle,
+              icon: const Icon(Icons.open_in_new, size: 18),
+              label: const Text('Open in Browser'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.black,
+                foregroundColor: Colors.white,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWebViewContent() {
+    return Stack(
+      children: [
+        WebViewWidget(controller: _webViewController),
+        if (_isLoading)
+          Container(
+            color: AppColors.background,
+            child: Center(
+              child: PlatformUtils.adaptiveProgressIndicator(
+                color: AppColors.black,
+              ),
+            ),
+          ),
+      ],
     );
   }
 
@@ -178,7 +247,7 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
     return SizedBox(
       height: 200,
       width: double.infinity,
-      child: CachedNetworkImage(
+      child: AppNetworkImage(
         imageUrl: widget.article.imageUrl!,
         fit: BoxFit.cover,
         placeholder: (context, url) => Container(

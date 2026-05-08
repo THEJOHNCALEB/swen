@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +8,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../core/utils/platform_utils.dart';
+import '../../../core/widgets/app_network_image.dart';
 import '../../../providers/bookmarks_provider.dart';
 
 class FeaturedArticleCard extends StatefulWidget {
@@ -144,7 +144,7 @@ class _FeaturedArticleCardState extends State<FeaturedArticleCard> {
           const BorderRadius.vertical(top: Radius.circular(16)),
       child: AspectRatio(
         aspectRatio: 16 / 10,
-        child: CachedNetworkImage(
+        child: AppNetworkImage(
           imageUrl: widget.article.imageUrl!,
           fit: BoxFit.cover,
           placeholder: (context, url) => Container(

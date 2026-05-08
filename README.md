@@ -37,13 +37,13 @@ Download for macOS: [Swen.dmg](https://github.com/THEJOHNCALEB/swen/releases/dow
    ```
 
 3. **Configure API key**
-   
+    
    Create a `.env` file in the project root:
    ```
-   API_KEY=your_newsapi_key_here
+   GNEWS_API_KEY=your_gnews_api_key_here
    ```
    
-   Get your free API key at [newsapi.org](https://newsapi.org/).
+   Get your free API key at [gnews.io](https://gnews.io/).
 
 4. **Run**
    ```bash
@@ -81,8 +81,8 @@ lib/
 
 ### Endpoints Used
 
-- `/top-headlines` — Category-based news
-- `/everything` — Keyword search
+- `/top-headlines` — Category-based news (GNews API v4)
+- `/search` — Keyword search (GNews API v4)
 
 ## Caching Strategy
 
@@ -115,7 +115,7 @@ lib/
 ### Web
 
 ```bash
-flutter build web --release
+flutter build web --release --dart-define=GNEWS_API_KEY=your_api_key_here
 # Deploy build/web/ to Vercel or Netlify
 ```
 
@@ -152,5 +152,5 @@ This project is created for educational purposes (HNG Stage 4).
 
 ## Credits
 
-- **News Data:** [NewsAPI](https://newsapi.org/)
+- **News Data:** [GNews](https://gnews.io/)
 - **Fonts:** DM Sans & DM Mono by Google Fonts

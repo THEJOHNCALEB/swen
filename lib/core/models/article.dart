@@ -71,7 +71,7 @@ class Article extends HiveObject {
       title: json['title'] as String? ?? 'Untitled',
       description: json['description'] as String?,
       url: url,
-      imageUrl: json['urlToImage'] as String?,
+      imageUrl: (json['image'] ?? json['urlToImage']) as String?,
       publishedAt: json['publishedAt'] != null
           ? DateTime.parse(json['publishedAt'] as String)
           : DateTime.now(),

@@ -13,8 +13,8 @@ class PlatformUtils {
       !kIsWeb && (Platform.isAndroid || Platform.isIOS);
   static bool get isDesktopOrWeb => isDesktop || isWeb;
 
-  static bool get isIOS => Platform.isIOS;
-  static bool get isAndroid => Platform.isAndroid;
+  static bool get isIOS => !kIsWeb && Platform.isIOS;
+  static bool get isAndroid => !kIsWeb && Platform.isAndroid;
 
   static Widget adaptiveProgressIndicator({Color? color, double? strokeWidth}) {
     if (isIOS) {
